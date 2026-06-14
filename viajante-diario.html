@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Viajante">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#2e7d32">
+<meta name="description" content="Diario de giras para viajante de comercio">
+<link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Diario+del+Viajante%22%2C%22short_name%22%3A%22Viajante%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%232e7d32%22%2C%22theme_color%22%3A%22%232e7d32%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg+xmlns%3D%2527http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%2527+viewBox%3D%25270+0+100+100%2527%253E%253Crect+width%3D%2527100%2527+height%3D%2527100%2527+fill%3D%2527%25232e7d32%2527%2F%253E%253Ctext+y%3D%2527.9em%2527+font-size%3D%252780%2527%253E%25F0%259F%258C%25BF%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22any%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
+<!-- Apple touch icon inline SVG via canvas (generado al cargar) -->
+<title>Diario del Viajante</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green: #2e7d32; --green-light: #4caf50; --green-pale: #e8f5e9;
+    --orange: #e65100; --orange-pale: #fff3e0;
+    --blue: #1565c0; --blue-pale: #e3f2fd;
+    --bg: #f5f5f5; --card: #ffffff;
+    --text: #1a1a1a; --muted: #757575; --border: #e0e0e0; --red: #c62828;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 80px; padding-bottom: calc(80px + env(safe-area-inset-bottom)); -webkit-tap-highlight-color: transparent; }
+
+  header { background: var(--green); color: white; padding: 16px 20px 12px; padding-top: calc(16px + env(safe-area-inset-top)); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+
+  /* PWA install banner */
+  .pwa-banner { background: #1b5e20; color: white; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; gap: 10px; }
+  .pwa-banner-text { flex: 1; line-height: 1.4; }
+  .pwa-banner-text strong { display: block; font-size: 14px; margin-bottom: 2px; }
+  .pwa-install-btn { background: white; color: #1b5e20; border: none; border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .pwa-close-btn { background: none; border: none; color: white; font-size: 20px; cursor: pointer; padding: 0 4px; opacity: 0.8; }
+  header h1 { font-size: 18px; font-weight: 700; }
+  header p { font-size: 13px; opacity: 0.85; margin-top: 2px; }
+
+  .page { display: none; padding: 16px; }
+  .page.active { display: block; }
+
+  .card { background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .card-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 12px; }
+
+  /* VOICE */
+  .voice-btn { width: 100%; padding: 16px; background: var(--green); color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; transition: all 0.2s; box-shadow: 0 3px 10px rgba(46,125,50,0.3); }
+  .voice-btn:active { transform: scale(0.97); }
+  .voice-btn.listening { background: var(--red); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{box-shadow:0 3px 10px rgba(198,40,40,0.3)} 50%{box-shadow:0 3px 20px rgba(198,40,40,0.6)} }
+  .voice-result { background: var(--green-pale); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--green); margin-bottom: 10px; display: none; }
+  .voice-result.visible { display: block; }
+
+  label { display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 5px; margin-top: 12px; text-transform: uppercase; letter-spacing: 0.3px; }
+  label:first-child { margin-top: 0; }
+  input[type="text"], input[type="number"], input[type="date"] { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 16px; background: white; color: var(--text); -webkit-appearance: none; }
+  input:focus { outline: none; border-color: var(--green); }
+  .notes-area { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 15px; background: white; color: var(--text); resize: vertical; min-height: 70px; font-family: inherit; }
+  .notes-area:focus { outline: none; border-color: var(--green); }
+
+  /* ROW INPUTS */
+  .row { display: flex; gap: 8px; }
+  .row input { flex: 1; }
+  .icon-btn { padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 18px; cursor: pointer; background: white; white-space: nowrap; }
+  .icon-btn.green { background: var(--green-pale); border-color: var(--green-light); }
+  .icon-btn.blue { background: var(--blue-pale); border-color: var(--blue); }
+
+  /* CLIENT CARDS */
+  .client-card { background: var(--green-pale); border: 1.5px solid var(--green-light); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+  .client-card-header { display: flex; align-items: center; justify-content: space-between; }
+  .client-card-name { font-weight: 700; font-size: 15px; color: var(--green); }
+  .client-card-actions { display: flex; gap: 6px; }
+  .sm-btn { padding: 6px 10px; border-radius: 6px; border: none; font-size: 13px; cursor: pointer; font-weight: 600; }
+  .sm-btn.mic { background: var(--blue); color: white; }
+  .sm-btn.add { background: var(--green); color: white; }
+  .sm-btn.del { background: none; color: var(--red); font-size: 16px; }
+
+  /* PEDIDOS */
+  .pedidos-list { margin-top: 8px; }
+  .pedido-item { display: flex; align-items: center; justify-content: space-between; background: white; border-radius: 6px; padding: 7px 10px; margin-bottom: 5px; font-size: 14px; }
+  .pedido-item .prod { flex: 1; color: var(--text); }
+  .pedido-item .cant { color: var(--orange); font-weight: 700; margin-right: 8px; font-size: 13px; }
+  .pedido-item button { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; padding: 2px; }
+  .add-pedido-row { display: flex; gap: 6px; margin-top: 8px; }
+  .add-pedido-row input:first-child { flex: 2; }
+  .add-pedido-row input:nth-child(2) { flex: 1; }
+
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+  /* SAVE */
+  .save-btn { width: 100%; padding: 16px; background: var(--orange); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 8px; box-shadow: 0 3px 10px rgba(230,81,0,0.3); transition: all 0.2s; }
+  .save-btn:active { transform: scale(0.97); }
+
+  /* STATS */
+  .stat-box { text-align: center; padding: 12px; background: var(--green-pale); border-radius: 10px; }
+  .stat-box .val { font-size: 26px; font-weight: 800; color: var(--green); }
+  .stat-box .lbl { font-size: 11px; color: var(--muted); font-weight: 600; margin-top: 2px; }
+
+  /* HISTORY */
+  .history-item { background: white; border-radius: 10px; padding: 14px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); cursor: pointer; }
+  .history-item .h-date { font-size: 13px; font-weight: 700; color: var(--green); margin-bottom: 8px; }
+  .history-item .h-stats { display: flex; gap: 14px; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
+  .history-item .h-preview { font-size: 13px; color: var(--text); margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .delete-btn { background: none; border: none; color: var(--red); font-size: 18px; cursor: pointer; float: right; }
+
+  /* DETAIL MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; }
+  .modal-overlay.open { display: flex; align-items: flex-end; }
+  .modal { background: white; border-radius: 16px 16px 0 0; padding: 20px; width: 100%; max-height: 80vh; overflow-y: auto; }
+  .modal-title { font-size: 16px; font-weight: 700; color: var(--green); margin-bottom: 16px; }
+  .modal-close { float: right; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--muted); }
+  .detail-client { background: var(--green-pale); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; }
+  .detail-client-name { font-weight: 700; font-size: 14px; color: var(--green); margin-bottom: 6px; }
+  .detail-pedido { font-size: 13px; color: var(--text); padding: 3px 0; }
+  .detail-pedido::before { content: "→ "; color: var(--orange); font-weight: 700; }
+
+  /* EXPORT */
+  .export-btn { width: 100%; padding: 14px; background: white; color: var(--green); border: 2px solid var(--green); border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+  /* BOTTOM NAV */
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border); display: flex; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
+  .bottom-nav button { flex: 1; padding: 10px 0; font-size: 11px; font-weight: 600; border: none; background: none; cursor: pointer; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .bottom-nav button .ico { font-size: 22px; }
+  .bottom-nav button.active { color: var(--green); }
+
+  #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); background: #333; color: white; padding: 10px 22px; border-radius: 24px; font-size: 14px; font-weight: 600; opacity: 0; transition: all 0.3s; z-index: 999; white-space: nowrap; }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 15px; }
+  .empty-state .ico { font-size: 48px; margin-bottom: 12px; }
+  .hint { font-size: 12px; color: var(--muted); text-align: center; margin-top: 6px; }
+
+  /* Listening overlay for pedido mic */
+  .mic-indicator { display: none; background: var(--blue-pale); border: 1.5px solid var(--blue); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--blue); font-weight: 600; margin-top: 8px; text-align: center; }
+  .mic-indicator.visible { display: block; animation: pulse-blue 1s infinite; }
+  @keyframes pulse-blue { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+  /* GPS TRACKER */
+  .gps-card { background: linear-gradient(135deg, #1a237e, #1565c0); border-radius: 12px; padding: 16px; margin-bottom: 14px; color: white; }
+  .gps-card .card-title { color: rgba(255,255,255,0.7); }
+  .gps-btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .gps-btn.start { background: #4caf50; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+  .gps-btn.stop { background: var(--red); color: white; animation: pulse-red 1.2s infinite; }
+  @keyframes pulse-red { 0%,100%{box-shadow:0 4px 12px rgba(198,40,40,0.4)} 50%{box-shadow:0 4px 20px rgba(198,40,40,0.8)} }
+  .gps-btn:active { transform: scale(0.97); }
+  .gps-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-top: 12px; }
+  .gps-stat { background: rgba(255,255,255,0.12); border-radius: 8px; padding: 10px; text-align: center; }
+  .gps-stat .v { font-size: 22px; font-weight: 800; }
+  .gps-stat .l { font-size: 11px; opacity: 0.75; margin-top: 2px; }
+  .gps-dot { display: inline-block; width: 8px; height: 8px; background: #4caf50; border-radius: 50%; margin-right: 6px; animation: blink 1s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+  .gps-status { font-size: 13px; text-align: center; margin-top: 10px; opacity: 0.85; min-height: 18px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🌿 Diario del Viajante</h1>
+  <p id="header-date"></p>
+</header>
+
+<!-- PWA Install Banner (iOS) -->
+<div class="pwa-banner" id="pwa-banner" style="display:none;">
+  <div class="pwa-banner-text">
+    <strong>📲 Instalá la app en tu iPhone</strong>
+    Tocá <strong>Compartir</strong> → <strong>"Agregar a inicio"</strong>
+  </div>
+  <button class="pwa-close-btn" onclick="dismissPwaBanner()">×</button>
+</div>
+
+<div id="toast"></div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <button class="active" onclick="showPage('registrar')" id="nav-registrar"><span class="ico">📝</span>Registrar</button>
+  <button onclick="showPage('hoy')" id="nav-hoy"><span class="ico">📊</span>Hoy</button>
+  <button onclick="showPage('historial')" id="nav-historial"><span class="ico">📅</span>Historial</button>
+  <button onclick="showPage('exportar')" id="nav-exportar"><span class="ico">⬇️</span>Exportar</button>
+</div>
+
+<!-- ===== REGISTRAR ===== -->
+<div class="page active" id="page-registrar">
+
+  <!-- GPS TRACKER -->
+  <div class="gps-card" id="gps-card">
+    <div class="card-title">📍 Rastreo de recorrido (GPS)</div>
+    <button class="gps-btn start" id="gps-btn" onclick="toggleGPS()">
+      <span id="gps-btn-icon">▶</span>
+      <span id="gps-btn-text">Iniciar viaje</span>
+    </button>
+    <div class="gps-stats">
+      <div class="gps-stat"><div class="v" id="gps-km">0.0</div><div class="l">km</div></div>
+      <div class="gps-stat"><div class="v" id="gps-tiempo">0:00</div><div class="l">tiempo</div></div>
+      <div class="gps-stat"><div class="v" id="gps-pts">0</div><div class="l">puntos GPS</div></div>
+    </div>
+    <div class="gps-status" id="gps-status">Tocá para iniciar el rastreo automático</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🎙️ Carga rápida por voz</div>
+    <button class="voice-btn" id="voice-btn-general" onclick="startVoice('general')">
+      <span id="vicon-general">🎤</span>
+      <span id="vtxt-general">Hablar: visita + km + horas</span>
+    </button>
+    <div class="voice-result" id="vresult-general"></div>
+    <p class="hint">Ej: "Visité a Juan López, recorrí 150 km, viajé 4 horas"</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📅 Fecha</div>
+    <input type="date" id="fecha">
+  </div>
+
+  <div class="card">
+    <div class="card-title">👥 Clientes y pedidos</div>
+    <div class="row" style="margin-bottom:10px;">
+      <input type="text" id="nuevo-cliente" placeholder="Nombre del cliente...">
+      <button class="icon-btn green" onclick="addClient()">+</button>
+    </div>
+    <div id="clients-list"></div>
+    <p class="hint" style="margin-top:4px;">Después de agregar un cliente, tocá el 🎤 para cargar su pedido por voz</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🛣️ Recorrido del día</div>
+    <div class="grid-2">
+      <div>
+        <label>Kilómetros</label>
+        <input type="number" id="km" placeholder="0" min="0">
+      </div>
+      <div>
+        <label>Horas de viaje</label>
+        <input type="number" id="horas" placeholder="0.0" min="0" step="0.5">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📝 Notas</div>
+    <textarea class="notes-area" id="notas" placeholder="Observaciones generales, condiciones de campo, etc."></textarea>
+  </div>
+
+  <button class="save-btn" onclick="saveRecord()">💾 Guardar día</button>
+</div>
+
+<!-- ===== HOY ===== -->
+<div class="page" id="page-hoy">
+  <div id="hoy-content"></div>
+</div>
+
+<!-- ===== HISTORIAL ===== -->
+<div class="page" id="page-historial">
+  <div id="historial-content"></div>
+</div>
+
+<!-- ===== EXPORTAR ===== -->
+<div class="page" id="page-exportar">
+  <div class="card">
+    <div class="card-title">📊 Exportar datos</div>
+    <button class="export-btn" onclick="exportCSV()">📄 Descargar CSV (Excel)</button>
+    <button class="export-btn" onclick="exportPedidosCSV()">📦 Pedidos por cliente (CSV)</button>
+    <button class="export-btn" onclick="exportResumen()">📝 Resumen del mes (.txt)</button>
+    <p class="hint" style="margin-top:4px;">El CSV se abre con Excel o Google Sheets.</p>
+  </div>
+  <div class="card" id="stats-mes"></div>
+</div>
+
+<script>
+// ===== STORAGE =====
+function getData() {
+  try { return JSON.parse(localStorage.getItem('viajante_v2') || '[]'); }
+  catch(e) { return []; }
+}
+function saveData(d) {
+  try { localStorage.setItem('viajante_v2', JSON.stringify(d)); }
+  catch(e) { showToast('⚠️ Sin espacio para guardar. Exportá y borrá datos viejos.'); }
+}
+
+// ===== INIT =====
+const today = new Date();
+// Fix timezone bug: usar fecha local, no UTC
+const todayStr = today.getFullYear() + '-' +
+  String(today.getMonth()+1).padStart(2,'0') + '-' +
+  String(today.getDate()).padStart(2,'0');
+document.getElementById('fecha').value = todayStr;
+document.getElementById('header-date').textContent = today.toLocaleDateString('es-AR', { weekday:'long', day:'numeric', month:'long' });
+
+// clients = [{nombre, pedidos:[{producto, cantidad}]}]
+let clients = [];
+
+function fmtDate(s) {
+  if (!s) return '';
+  const [y,m,d] = s.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+// ===== NAVIGATION =====
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.bottom-nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+  if (name === 'hoy') renderHoy();
+  if (name === 'historial') renderHistorial();
+  if (name === 'exportar') renderStats();
+}
+
+// ===== CLIENTS =====
+function addClient(nombre) {
+  const input = document.getElementById('nuevo-cliente');
+  const n = (nombre || input.value).trim();
+  if (!n) return;
+  clients.push({ nombre: n, pedidos: [] });
+  if (!nombre) input.value = '';
+  renderClients();
+  if (!nombre) input.focus();
+}
+
+function removeClient(i) {
+  clients.splice(i, 1);
+  renderClients();
+}
+
+function addPedido(clientIdx) {
+  const prod = document.getElementById(`prod-${clientIdx}`).value.trim();
+  const cant = document.getElementById(`cant-${clientIdx}`).value.trim();
+  if (!prod) return;
+  clients[clientIdx].pedidos.push({ producto: prod, cantidad: cant || '—' });
+  document.getElementById(`prod-${clientIdx}`).value = '';
+  document.getElementById(`cant-${clientIdx}`).value = '';
+  renderClients();
+  showToast('Pedido agregado');
+}
+
+function removePedido(ci, pi) {
+  clients[ci].pedidos.splice(pi, 1);
+  renderClients();
+}
+
+function renderClients() {
+  const el = document.getElementById('clients-list');
+  if (!clients.length) { el.innerHTML = ''; return; }
+  el.innerHTML = clients.map((c, i) => `
+    <div class="client-card">
+      <div class="client-card-header">
+        <span class="client-card-name">👤 ${c.nombre}</span>
+        <div class="client-card-actions">
+          <button class="sm-btn mic" onclick="startVoice('pedido', ${i})">🎤 Pedido</button>
+          <button class="sm-btn del" onclick="removeClient(${i})">×</button>
+        </div>
+      </div>
+      <div id="mic-ind-${i}" class="mic-indicator"></div>
+      <div class="pedidos-list">
+        ${c.pedidos.map((p, pi) => `
+          <div class="pedido-item">
+            <span class="cant">${p.cantidad}</span>
+            <span class="prod">${p.producto}</span>
+            <button onclick="removePedido(${i}, ${pi})">×</button>
+          </div>
+        `).join('')}
+      </div>
+      <div class="add-pedido-row">
+        <input type="text" id="prod-${i}" placeholder="Producto..." onkeydown="if(event.key==='Enter')addPedido(${i})">
+        <input type="text" id="cant-${i}" placeholder="Cantidad" onkeydown="if(event.key==='Enter')addPedido(${i})">
+        <button class="icon-btn green" onclick="addPedido(${i})">+</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ===== VOICE =====
+let activeRecognition = null;
+let currentListeningBtn = null;
+
+// iOS Safari no soporta SpeechRecognition
+const hasSpeechRecognition = ('webkitSpeechRecognition' in window) || ('SpeechRecognition' in window);
+
+function startVoice(mode, clientIdx) {
+  if (!hasSpeechRecognition) {
+    showToast('⚠️ Voz no disponible en Safari. Usá Chrome.');
+    return;
+  }
+  if (activeRecognition) {
+    try { activeRecognition.stop(); } catch(e) {}
+    activeRecognition = null;
+    return;
+  }
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const r = new SR();
+  r.lang = 'es-AR';
+  r.continuous = false;
+  r.interimResults = false;
+  activeRecognition = r;
+
+  if (mode === 'general') {
+    const btn = document.getElementById('voice-btn-general');
+    btn.classList.add('listening');
+    document.getElementById('vtxt-general').textContent = 'Escuchando... (tocá para parar)';
+    document.getElementById('vicon-general').textContent = '⏹️';
+    currentListeningBtn = btn;
+  } else {
+    const ind = document.getElementById(`mic-ind-${clientIdx}`);
+    if (ind) {
+      ind.classList.add('visible');
+      ind.textContent = '🎤 Escuchando pedido para ' + clients[clientIdx].nombre + '...';
+    }
+    currentListeningBtn = ind;
+  }
+
+  r.onresult = (e) => {
+    const text = e.results[0][0].transcript;
+    if (mode === 'general') {
+      processGeneralVoice(text);
+    } else {
+      processPedidoVoice(text, clientIdx);
+    }
+  };
+
+  r.onend = () => {
+    activeRecognition = null;
+    // Siempre restaurar estado del botón general
+    const btn = document.getElementById('voice-btn-general');
+    if (btn) {
+      btn.classList.remove('listening');
+      document.getElementById('vtxt-general').textContent = 'Hablar: visita + km + horas';
+      document.getElementById('vicon-general').textContent = '🎤';
+    }
+    if (mode !== 'general') {
+      const ind = document.getElementById(`mic-ind-${clientIdx}`);
+      if (ind) { ind.classList.remove('visible'); ind.textContent = ''; }
+    }
+  };
+
+  r.onerror = (e) => {
+    activeRecognition = null;
+    const msgs = { 'no-speech': 'No se detectó voz', 'not-allowed': 'Permiso de micrófono denegado', 'network': 'Error de red' };
+    showToast('⚠️ ' + (msgs[e.error] || 'Error: ' + e.error));
+    // Restaurar botón en caso de error
+    const btn = document.getElementById('voice-btn-general');
+    if (btn) { btn.classList.remove('listening'); document.getElementById('vtxt-general').textContent = 'Hablar: visita + km + horas'; document.getElementById('vicon-general').textContent = '🎤'; }
+    if (mode !== 'general') {
+      const ind = document.getElementById(`mic-ind-${clientIdx}`);
+      if (ind) { ind.classList.remove('visible'); ind.textContent = ''; }
+    }
+  };
+
+  try { r.start(); } catch(e) { showToast('Error al iniciar micrófono'); activeRecognition = null; }
+}
+
+function processGeneralVoice(text) {
+  const el = document.getElementById('vresult-general');
+  el.classList.add('visible');
+  el.textContent = '"' + text + '"';
+
+  // KM
+  const km = text.match(/(\d+[\.,]?\d*)\s*(kil[oó]metros?|km)/i);
+  if (km) document.getElementById('km').value = parseFloat(km[1].replace(',','.'));
+
+  // Horas
+  const hs = text.match(/(\d+[\.,]?\d*)\s*horas?/i);
+  if (hs) document.getElementById('horas').value = parseFloat(hs[1].replace(',','.'));
+
+  // Clientes: "visité a Juan y a María" / "estuve con Ana López"
+  const visitMatch = text.match(/visit[eéé]\s+(?:a\s+)?(.+?)(?:\s*,\s*recorr|\s*,\s*viaj|\s*,\s*hice|$)/i);
+  if (visitMatch) {
+    const raw = visitMatch[1];
+    const nombres = raw.split(/\s+y\s+(?:a\s+)?|\s*,\s*/i).map(s => s.replace(/^a\s+/i,'').trim()).filter(Boolean);
+    nombres.forEach(n => addClient(n));
+  }
+
+  showToast('✅ Voz procesada');
+}
+
+function processPedidoVoice(text, clientIdx) {
+  // Patterns:
+  // "5 ivermectinas y 3 vacunas"
+  // "diez litros de herbicida y dos kg de fungicida"
+  // "ivermectina 500ml, herbicida 2 litros"
+  const result = document.getElementById('vresult-general');
+  result.classList.add('visible');
+  result.textContent = `[${clients[clientIdx].nombre}]: "${text}"`;
+
+  // Try to extract quantity + product pairs
+  // Pattern: (número/texto) (unidad?) (de?) (producto)
+  const entries = extractPedidos(text);
+  if (entries.length > 0) {
+    entries.forEach(e => clients[clientIdx].pedidos.push(e));
+    renderClients();
+    showToast(`✅ ${entries.length} producto${entries.length>1?'s':''} agregado${entries.length>1?'s':''}`);
+  } else {
+    // Fallback: add the whole text as a product
+    clients[clientIdx].pedidos.push({ producto: text, cantidad: '—' });
+    renderClients();
+    showToast('Pedido agregado (revisá la cantidad)');
+  }
+}
+
+function extractPedidos(text) {
+  const results = [];
+  // Split by "y", "," to get individual items
+  const parts = text.split(/\s+y\s+|\s*,\s*/i);
+  parts.forEach(part => {
+    part = part.trim();
+    if (!part) return;
+
+    // Pattern A: "X unidades de producto" or "X producto"
+    // número al inicio
+    const numFirst = part.match(/^(\d+[\.,]?\d*)\s*(unidades?|litros?|kg|kilos?|cajas?|frascos?|fardos?|bolsas?|dosis?)?\s*(?:de\s+)?(.+)/i);
+    if (numFirst) {
+      const cant = numFirst[1] + (numFirst[2] ? ' ' + numFirst[2] : '');
+      const prod = numFirst[3].trim();
+      if (prod) { results.push({ cantidad: cant, producto: prod }); return; }
+    }
+
+    // Pattern B: "producto X cantidad" (producto al inicio)
+    const prodFirst = part.match(/^(.+?)\s+(\d+[\.,]?\d*)\s*(unidades?|litros?|kg|kilos?|cajas?|frascos?|fardos?|bolsas?|dosis?)?$/i);
+    if (prodFirst) {
+      const prod = prodFirst[1].trim();
+      const cant = prodFirst[2] + (prodFirst[3] ? ' ' + prodFirst[3] : '');
+      if (prod && cant) { results.push({ cantidad: cant, producto: prod }); return; }
+    }
+
+    // Fallback: whole part as product
+    results.push({ producto: part, cantidad: '—' });
+  });
+  return results;
+}
+
+// ===== SAVE =====
+function saveRecord() {
+  const fecha = document.getElementById('fecha').value;
+  const km = parseFloat(document.getElementById('km').value) || 0;
+  const horas = parseFloat(document.getElementById('horas').value) || 0;
+  const notas = document.getElementById('notas').value.trim();
+
+  if (!fecha) { showToast('Completá la fecha'); return; }
+
+  const data = getData();
+  const idx = data.findIndex(r => r.fecha === fecha);
+  const record = { fecha, km, horas, clientes: JSON.parse(JSON.stringify(clients)), notas, savedAt: new Date().toISOString() };
+
+  if (idx >= 0) {
+    if (!confirm('Ya hay un registro para esta fecha. ¿Reemplazar?')) return;
+    data[idx] = record;
+  } else {
+    data.unshift(record);
+  }
+  saveData(data);
+  showToast('✅ Día guardado');
+
+  // Reset
+  clients = [];
+  renderClients();
+  ['km','horas','notas'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('vresult-general').classList.remove('visible');
+
+  // Avanzar fecha al día siguiente (usando fecha local, no UTC)
+  const parts = fecha.split('-');
+  const next = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2])+1);
+  const nextStr = next.getFullYear() + '-' +
+    String(next.getMonth()+1).padStart(2,'0') + '-' +
+    String(next.getDate()).padStart(2,'0');
+  document.getElementById('fecha').value = nextStr;
+}
+
+// ===== HOY =====
+function renderHoy() {
+  const data = getData();
+  const r = data.find(d => d.fecha === todayStr);
+  const el = document.getElementById('hoy-content');
+  if (!r) {
+    el.innerHTML = `<div class="empty-state"><div class="ico">📋</div><div>Todavía no registraste hoy.</div></div>`;
+    return;
+  }
+  const totalPedidos = r.clientes.reduce((s, c) => s + c.pedidos.length, 0);
+  el.innerHTML = `
+    <div class="card">
+      <div class="card-title">📅 ${fmtDate(r.fecha)}</div>
+      <div class="grid-2" style="margin-bottom:10px;">
+        <div class="stat-box"><div class="val">${r.km}</div><div class="lbl">km recorridos</div></div>
+        <div class="stat-box"><div class="val">${r.horas}h</div><div class="lbl">horas de viaje</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="stat-box"><div class="val">${r.clientes.length}</div><div class="lbl">clientes</div></div>
+        <div class="stat-box"><div class="val">${totalPedidos}</div><div class="lbl">pedidos</div></div>
+      </div>
+    </div>
+    ${r.clientes.length > 0 ? `
+    <div class="card">
+      <div class="card-title">📦 Clientes y pedidos</div>
+      ${r.clientes.map(c => `
+        <div class="detail-client">
+          <div class="detail-client-name">👤 ${c.nombre} ${c.pedidos.length > 0 ? `<span style="font-size:12px;color:var(--muted);font-weight:400;">(${c.pedidos.length} pedido${c.pedidos.length>1?'s':''})</span>` : ''}</div>
+          ${c.pedidos.map(p => `<div class="detail-pedido"><strong>${p.cantidad}</strong> — ${p.producto}</div>`).join('')}
+          ${c.pedidos.length === 0 ? '<div style="font-size:12px;color:var(--muted);">Sin pedidos registrados</div>' : ''}
+        </div>
+      `).join('')}
+    </div>` : ''}
+    ${r.notas ? `<div class="card"><div class="card-title">📝 Notas</div><div style="font-size:14px;line-height:1.5;">${r.notas}</div></div>` : ''}
+  `;
+}
+
+// ===== HISTORIAL =====
+function renderHistorial() {
+  const data = getData();
+  const el = document.getElementById('historial-content');
+  if (!data.length) {
+    el.innerHTML = `<div class="empty-state"><div class="ico">📅</div><div>No hay registros todavía.</div></div>`;
+    return;
+  }
+  el.innerHTML = data.map((r, i) => {
+    const totalPedidos = r.clientes.reduce((s, c) => s + c.pedidos.length, 0);
+    const clientNames = r.clientes.map(c => c.nombre).join(' · ');
+    return `
+      <div class="history-item" onclick="showDetail(${i})">
+        <button class="delete-btn" onclick="event.stopPropagation();deleteRecord(${i})">🗑</button>
+        <div class="h-date">📅 ${fmtDate(r.fecha)}</div>
+        <div class="h-stats">
+          <span>🛣 ${r.km} km</span>
+          <span>⏱ ${r.horas}h</span>
+          <span>👥 ${r.clientes.length} clientes</span>
+          <span>📦 ${totalPedidos} pedidos</span>
+        </div>
+        ${clientNames ? `<div class="h-preview">${clientNames}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+function showDetail(i) {
+  const data = getData();
+  const r = data[i];
+  const totalPedidos = r.clientes.reduce((s, c) => s + c.pedidos.length, 0);
+  document.getElementById('modal-content').innerHTML = `
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-title">📅 ${fmtDate(r.fecha)}</div>
+    <div class="grid-2" style="margin-bottom:14px;">
+      <div class="stat-box"><div class="val">${r.km}</div><div class="lbl">km</div></div>
+      <div class="stat-box"><div class="val">${r.horas}h</div><div class="lbl">viaje</div></div>
+    </div>
+    <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Clientes y pedidos (${totalPedidos} total)</div>
+    ${r.clientes.map(c => `
+      <div class="detail-client">
+        <div class="detail-client-name">👤 ${c.nombre}</div>
+        ${c.pedidos.map(p => `<div class="detail-pedido"><strong>${p.cantidad}</strong> — ${p.producto}</div>`).join('')}
+        ${c.pedidos.length === 0 ? '<div style="font-size:12px;color:var(--muted);">Sin pedidos</div>' : ''}
+      </div>
+    `).join('')}
+    ${r.notas ? `<div style="margin-top:12px;font-size:13px;color:var(--muted);">${r.notas}</div>` : ''}
+    <button class="save-btn" style="margin-top:16px;" onclick="loadRecord(${i});closeModal()">✏️ Editar este día</button>
+  `;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('modal-overlay')) {
+    document.getElementById('modal-overlay').classList.remove('open');
+  }
+}
+
+function loadRecord(i) {
+  const data = getData();
+  const r = data[i];
+  document.getElementById('fecha').value = r.fecha;
+  document.getElementById('km').value = r.km;
+  document.getElementById('horas').value = r.horas;
+  document.getElementById('notas').value = r.notas || '';
+  clients = JSON.parse(JSON.stringify(r.clientes));
+  renderClients();
+  showPage('registrar');
+  showToast('Registro cargado para editar');
+}
+
+function deleteRecord(i) {
+  if (!confirm('¿Eliminar este registro?')) return;
+  const data = getData();
+  data.splice(i, 1);
+  saveData(data);
+  renderHistorial();
+  showToast('Eliminado');
+}
+
+// ===== EXPORTS =====
+function exportCSV() {
+  const data = getData();
+  if (!data.length) { showToast('Sin datos'); return; }
+  const rows = [['Fecha','Clientes visitados','Cant. clientes','Total pedidos','Kilómetros','Horas viaje','Notas']];
+  data.forEach(r => {
+    const totalPed = r.clientes.reduce((s,c) => s+c.pedidos.length, 0);
+    rows.push([
+      fmtDate(r.fecha),
+      '"' + r.clientes.map(c=>c.nombre).join(', ') + '"',
+      r.clientes.length, totalPed, r.km, r.horas,
+      '"' + (r.notas||'').replace(/"/g,'""') + '"'
+    ]);
+  });
+  downloadCSV(rows, 'diario_viajante_' + todayStr + '.csv');
+}
+
+function exportPedidosCSV() {
+  const data = getData();
+  if (!data.length) { showToast('Sin datos'); return; }
+  const rows = [['Fecha','Cliente','Producto','Cantidad']];
+  data.forEach(r => {
+    r.clientes.forEach(c => {
+      if (c.pedidos.length === 0) {
+        rows.push([fmtDate(r.fecha), c.nombre, '—', '—']);
+      } else {
+        c.pedidos.forEach(p => {
+          rows.push([fmtDate(r.fecha), c.nombre, p.producto, p.cantidad]);
+        });
+      }
+    });
+  });
+  downloadCSV(rows, 'pedidos_clientes_' + todayStr + '.csv');
+}
+
+function downloadCSV(rows, filename) {
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  showToast('✅ CSV descargado');
+}
+
+function exportResumen() {
+  const data = getData();
+  const now = new Date();
+  const delMes = data.filter(r => {
+    const d = new Date(r.fecha);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+  if (!delMes.length) { showToast('Sin datos de este mes'); return; }
+
+  const totalKm = delMes.reduce((s,r)=>s+r.km,0);
+  const totalHoras = delMes.reduce((s,r)=>s+r.horas,0);
+  const allVisitas = delMes.flatMap(r=>r.clientes);
+  const uniqueClients = [...new Set(allVisitas.map(c=>c.nombre))];
+  const totalPedidos = allVisitas.reduce((s,c)=>s+c.pedidos.length,0);
+
+  // Pedidos por cliente
+  const pedidosPorCliente = {};
+  allVisitas.forEach(c => {
+    if (!pedidosPorCliente[c.nombre]) pedidosPorCliente[c.nombre] = [];
+    pedidosPorCliente[c.nombre].push(...c.pedidos);
+  });
+
+  let text = `RESUMEN ${now.toLocaleString('es-AR',{month:'long',year:'numeric'}).toUpperCase()}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📅 Días trabajados: ${delMes.length}
+🛣  Total km: ${totalKm}
+⏱  Total horas viaje: ${totalHoras}h
+👥 Visitas: ${allVisitas.length} (${uniqueClients.length} clientes únicos)
+📦 Total pedidos: ${totalPedidos}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PEDIDOS POR CLIENTE:\n`;
+
+  uniqueClients.forEach(nombre => {
+    const peds = pedidosPorCliente[nombre];
+    text += `\n• ${nombre}\n`;
+    if (peds.length === 0) text += '  (sin pedidos)\n';
+    else peds.forEach(p => text += `  → ${p.cantidad} ${p.producto}\n`);
+  });
+
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'resumen_' + now.toISOString().substring(0,7) + '.txt';
+  a.click();
+  showToast('✅ Resumen descargado');
+}
+
+function renderStats() {
+  const data = getData();
+  const now = new Date();
+  const delMes = data.filter(r => {
+    const d = new Date(r.fecha);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+  const el = document.getElementById('stats-mes');
+  if (!delMes.length) { el.innerHTML = '<p style="color:var(--muted);font-size:14px;text-align:center;">Sin datos de este mes.</p>'; return; }
+
+  const totalKm = delMes.reduce((s,r)=>s+r.km,0);
+  const totalHoras = delMes.reduce((s,r)=>s+r.horas,0);
+  const totalVisitas = delMes.reduce((s,r)=>s+r.clientes.length,0);
+  const totalPedidos = delMes.reduce((s,r)=>s+r.clientes.reduce((ss,c)=>ss+c.pedidos.length,0),0);
+
+  el.innerHTML = `
+    <div class="card-title">📊 ${now.toLocaleString('es-AR',{month:'long',year:'numeric'})}</div>
+    <div class="grid-2" style="margin-bottom:10px;">
+      <div class="stat-box"><div class="val">${delMes.length}</div><div class="lbl">días trabajados</div></div>
+      <div class="stat-box"><div class="val">${totalKm}</div><div class="lbl">km totales</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="stat-box"><div class="val">${totalVisitas}</div><div class="lbl">visitas</div></div>
+      <div class="stat-box"><div class="val">${totalPedidos}</div><div class="lbl">pedidos</div></div>
+    </div>
+  `;
+}
+
+// ===== TOAST =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ===== GPS TRACKER =====
+let gpsTracking = false;
+let gpsWatchId = null;
+let gpsPoints = [];
+let gpsStartTime = null;
+let gpsTimerInterval = null;
+let gpsTotalKm = 0;
+
+function toggleGPS() {
+  if (gpsTracking) {
+    stopGPS();
+  } else {
+    startGPS();
+  }
+}
+
+function startGPS() {
+  if (!navigator.geolocation) {
+    showToast('Tu dispositivo no soporta GPS');
+    return;
+  }
+  // En iPhone, el GPS solo funciona con HTTPS o localhost
+  if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+    document.getElementById('gps-status').textContent = '⚠️ El GPS requiere HTTPS. Abrí el archivo desde un servidor o la app instalada.';
+    showToast('⚠️ GPS requiere HTTPS en iPhone');
+    return;
+  }
+
+  gpsPoints = [];
+  gpsTotalKm = 0;
+  gpsStartTime = Date.now();
+
+  document.getElementById('gps-btn').className = 'gps-btn stop';
+  document.getElementById('gps-btn-icon').textContent = '⏹';
+  document.getElementById('gps-btn-text').textContent = 'Finalizar viaje';
+  document.getElementById('gps-status').innerHTML = '<span class="gps-dot"></span>Rastreando tu recorrido...';
+  document.getElementById('gps-km').textContent = '0.0';
+  document.getElementById('gps-pts').textContent = '0';
+
+  gpsTracking = true;
+
+  // Timer
+  gpsTimerInterval = setInterval(updateTimer, 1000);
+
+  // Watch position
+  gpsWatchId = navigator.geolocation.watchPosition(
+    (pos) => {
+      const { latitude, longitude, accuracy } = pos.coords;
+      if (accuracy > 100) return;
+
+      const newPoint = { lat: latitude, lng: longitude, t: Date.now() };
+
+      if (gpsPoints.length > 0) {
+        const last = gpsPoints[gpsPoints.length - 1];
+        const dist = haversine(last.lat, last.lng, newPoint.lat, newPoint.lng);
+        if (dist < 0.020) return;
+        gpsTotalKm += dist;
+      }
+
+      gpsPoints.push(newPoint);
+      document.getElementById('gps-km').textContent = gpsTotalKm.toFixed(1);
+      document.getElementById('gps-pts').textContent = gpsPoints.length;
+    },
+    (err) => {
+      const msgs = { 1: 'Permiso de ubicación denegado — activalo en Ajustes > Safari', 2: 'Ubicación no disponible', 3: 'Tiempo de espera agotado' };
+      document.getElementById('gps-status').textContent = '⚠️ ' + (msgs[err.code] || 'Error GPS');
+      stopGPS();
+    },
+    { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
+  );
+}
+
+function stopGPS() {
+  if (gpsWatchId !== null) {
+    navigator.geolocation.clearWatch(gpsWatchId);
+    gpsWatchId = null;
+  }
+  clearInterval(gpsTimerInterval);
+  gpsTracking = false;
+
+  document.getElementById('gps-btn').className = 'gps-btn start';
+  document.getElementById('gps-btn-icon').textContent = '▶';
+  document.getElementById('gps-btn-text').textContent = 'Iniciar viaje';
+
+  const kmFinal = gpsTotalKm.toFixed(1);
+  const mins = Math.round((Date.now() - gpsStartTime) / 60000);
+  const horas = (mins / 60).toFixed(1);
+
+  // Auto-fill km and hours
+  document.getElementById('km').value = kmFinal;
+  document.getElementById('horas').value = horas;
+
+  document.getElementById('gps-status').textContent = `✅ Viaje finalizado: ${kmFinal} km en ${mins} min`;
+  showToast(`✅ ${kmFinal} km registrados automáticamente`);
+}
+
+function updateTimer() {
+  if (!gpsStartTime) return;
+  const elapsed = Math.floor((Date.now() - gpsStartTime) / 1000);
+  const m = Math.floor(elapsed / 60);
+  const s = elapsed % 60;
+  document.getElementById('gps-tiempo').textContent = m + ':' + String(s).padStart(2,'0');
+}
+
+// Haversine formula: distance in km between two lat/lng points
+function haversine(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+// Enter on client input
+document.getElementById('nuevo-cliente').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); addClient(); }
+});
+
+// ===== PWA: mostrar banner de instalación en iPhone =====
+function isIos() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+function isInStandaloneMode() {
+  return ('standalone' in window.navigator) && window.navigator.standalone;
+}
+
+function dismissPwaBanner() {
+  document.getElementById('pwa-banner').style.display = 'none';
+  try { localStorage.setItem('pwa_banner_dismissed', '1'); } catch(e) {}
+}
+
+// Mostrar banner solo en iPhone, solo si no está instalada, y solo si no fue descartado
+if (isIos() && !isInStandaloneMode()) {
+  const dismissed = (() => { try { return localStorage.getItem('pwa_banner_dismissed'); } catch(e) { return null; } })();
+  if (!dismissed) {
+    // Mostrar después de 1.5s para no interrumpir la carga
+    setTimeout(() => {
+      document.getElementById('pwa-banner').style.display = 'flex';
+    }, 1500);
+  }
+}
+
+// ===== SERVICE WORKER (para uso offline) =====
+if ('serviceWorker' in navigator) {
+  // Registrar SW inline usando blob URL
+  const swCode = `
+    const CACHE = 'viajante-v1';
+    self.addEventListener('install', e => {
+      self.skipWaiting();
+    });
+    self.addEventListener('activate', e => {
+      e.waitUntil(caches.keys().then(keys =>
+        Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+      ));
+      self.clients.claim();
+    });
+    self.addEventListener('fetch', e => {
+      // Cache-first para archivos propios
+      if (e.request.method !== 'GET') return;
+      e.respondWith(
+        caches.match(e.request).then(cached => {
+          if (cached) return cached;
+          return fetch(e.request).then(resp => {
+            if (resp && resp.status === 200) {
+              const clone = resp.clone();
+              caches.open(CACHE).then(c => c.put(e.request, clone));
+            }
+            return resp;
+          }).catch(() => cached);
+        })
+      );
+    });
+  `;
+  const swBlob = new Blob([swCode], { type: 'application/javascript' });
+  const swUrl = URL.createObjectURL(swBlob);
+  navigator.serviceWorker.register(swUrl).catch(() => {
+    // SW blob no funciona en file:// — no pasa nada, la app igual funciona
+  });
+}
+
+// ===== APPLE TOUCH ICON (generado dinámicamente) =====
+(function() {
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = 180; canvas.height = 180;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#2e7d32';
+    const r = 36;
+    ctx.beginPath();
+    ctx.moveTo(r, 0); ctx.lineTo(180-r, 0); ctx.quadraticCurveTo(180, 0, 180, r);
+    ctx.lineTo(180, 180-r); ctx.quadraticCurveTo(180, 180, 180-r, 180);
+    ctx.lineTo(r, 180); ctx.quadraticCurveTo(0, 180, 0, 180-r);
+    ctx.lineTo(0, r); ctx.quadraticCurveTo(0, 0, r, 0);
+    ctx.closePath(); ctx.fill();
+    ctx.font = '110px serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('🌿', 90, 95);
+    const link = document.createElement('link');
+    link.rel = 'apple-touch-icon';
+    link.href = canvas.toDataURL('image/png');
+    document.head.appendChild(link);
+  } catch(e) {}
+})();
+</script>
+</body>
+</html>
